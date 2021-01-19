@@ -30,10 +30,10 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME);
 
 /* slots */
 #define LITEETH_SLOT_BASE	DT_INST_REG_ADDR_BY_NAME(0, buffers)
-#define LITEETH_SLOT_RX0	((LITEETH_SLOT_BASE) + 0x0000)
-#define LITEETH_SLOT_RX1	((LITEETH_SLOT_BASE) + 0x0800)
-#define LITEETH_SLOT_TX0	((LITEETH_SLOT_BASE) + 0x1000)
-#define LITEETH_SLOT_TX1	((LITEETH_SLOT_BASE) + 0x1800)
+#define LITEETH_RX_FIFO_DEPTH	DT_PROP(DT_NODELABEL(eth0), rx_fifo_depth)
+#define LITEETH_TX_FIFO_DEPTH	DT_PROP(DT_NODELABEL(eth0), tx_fifo_depth)
+#define LITEETH_SLOT_RX(n)	(LITEETH_SLOT_BASE + 0x800*((n)))
+#define LITEETH_SLOT_TX(n)	(LITEETH_SLOT_BASE + 0x800*((n)+LITEETH_RX_FIFO_DEPTH))
 
 /* sram - rx */
 #define LITEETH_RX_BASE		DT_INST_REG_ADDR_BY_NAME(0, control)
@@ -61,8 +61,8 @@ struct eth_liteeth_dev_data {
 	uint8_t txslot;
 	uint8_t rxslot;
 
-	uint8_t *tx_buf[2];
-	uint8_t *rx_buf[2];
+	uint8_t *tx_buf[LITEETH_TX_FIFO_DEPTH];
+	uint8_t *rx_buf[LITEETH_RX_FIFO_DEPTH];
 };
 
 struct eth_liteeth_config {
@@ -103,7 +103,7 @@ static int eth_tx(const struct device *dev, struct net_pkt *pkt)
 	sys_write8(1, LITEETH_TX_START);
 
 	/* change slot */
-	context->txslot = (context->txslot + 1) % 2;
+	context->txslot = (context->txslot + 1) % LITEETH_TX_FIFO_DEPTH;
 
 	irq_unlock(key);
 
@@ -190,6 +190,7 @@ static void eth_iface_init(struct net_if *iface)
 	const struct device *port = net_if_get_device(iface);
 	struct eth_liteeth_dev_data *context = port->data;
 	static bool init_done;
+	int i;
 
 	/* initialize only once */
 	if (init_done) {
@@ -217,13 +218,13 @@ static void eth_iface_init(struct net_if *iface)
 
 	/* setup tx slots */
 	context->txslot = 0;
-	context->tx_buf[0] = (uint8_t *)LITEETH_SLOT_TX0;
-	context->tx_buf[1] = (uint8_t *)LITEETH_SLOT_TX1;
+	for (i = 0; i < LITEETH_TX_FIFO_DEPTH; i++)
+		context->tx_buf[i] = (uint8_t *)LITEETH_SLOT_TX(i);
 
 	/* setup rx slots */
 	context->rxslot = 0;
-	context->rx_buf[0] = (uint8_t *)LITEETH_SLOT_RX0;
-	context->rx_buf[1] = (uint8_t *)LITEETH_SLOT_RX1;
+	for (i = 0; i < LITEETH_RX_FIFO_DEPTH; i++)
+		context->rx_buf[i] = (uint8_t *)LITEETH_SLOT_RX(i);
 
 	init_done = true;
 }
