@@ -13,3 +13,13 @@ properties:
 
     interrupts:
         required: true
+
+    tx-fifo-depth:
+        type: int
+        required: false
+        default: 2
+
+    rx-fifo-depth:
+        type: int
+        required: false
+        default: 2
