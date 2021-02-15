@@ -12,6 +12,7 @@
 
 
 	chosen {
+	       zephyr,entropy = &trng0;
 	};
 
 	cpus {
@@ -49,7 +50,7 @@
 			label = "uart0";
 			status = "disabled";
 		};
-		timer0: serial@82002800 {
+		timer0: timer0@82002800 {
 			compatible = "litex,timer0";
 			interrupt-parent = <&intc0>;
 			interrupts = <1 0>;
@@ -70,6 +71,13 @@
 			local-mac-address = [10 e2 d5 00 00 00];
 			reg-names = "control", "phy", "buffers";
 			label = "eth0";
+			status = "disabled";
+		};
+		trng0: trng@82005800 {
+			compatible = "litex,trng";
+			reg = <0x82005800 0x14>;
+			reg-names = "control";
+			label = "trng0";
 			status = "disabled";
 		};
 	};

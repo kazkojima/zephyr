@@ -1,0 +1,12 @@
+# Copyright (c) 2019 Antmicro <www.antmicro.com>
+# SPDX-License-Identifier: Apache-2.0
+
+description: LiteX TRNG
+
+compatible: "litex,trng"
+
+include: base.yaml
+
+properties:
+    reg:
+        required: true
