@@ -126,6 +126,9 @@ manifest:
     - name: tinycrypt
       path: modules/crypto/tinycrypt
       revision: 3e9a49d2672ec01435ffbf0d788db6d95ef28de0
+    - name: wolfssl
+      revision: 80e75c3db874776e5b175c6f7451df5ee565cbd1
+      path: modules/crypto/wolfssl
     - name: littlefs
       path: modules/fs/littlefs
       revision: 9e4498d1c73009acd84bb36036ee5e2869112a6c
